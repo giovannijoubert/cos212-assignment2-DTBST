@@ -1,7 +1,7 @@
 /*
 Complete your details...
-Name and Surname: 
-Student/staff Number:
+Name and Surname: Giovanni Joubert 
+Student/staff Number: u18009035
 */
 
 public class DTNode<T extends Comparable<? super T>>
@@ -11,6 +11,15 @@ public class DTNode<T extends Comparable<? super T>>
 	Methods and variables can be added.
 	Names of the given variables must not be altered. 
 	*/
+
+	//Constructor
+	public DTNode(T data){
+		this.data = data;
+		left = null;
+		right = null;
+		hasLeftThread = false;
+		hasRightThread = false;
+	}
 	
 	protected T data;
 	protected DTNode<T> left, right; // left child and right child

@@ -1,7 +1,7 @@
 /*
 Complete your details...
-Name and Surname: 
-Student/staff Number:
+Name and Surname: Giovanni Joubert 
+Student/staff Number: u18009035
 */
 
 
@@ -22,6 +22,7 @@ public class DoubleThreadedBST<T extends Comparable<? super T>>
 		/*
 		The default constructor
 		*/
+		root = null;
 	}
 	
 	public DoubleThreadedBST(DoubleThreadedBST<T> other)
@@ -29,6 +30,7 @@ public class DoubleThreadedBST<T extends Comparable<? super T>>
 		/*
 		The copy constructor
 		*/
+		root = other.root;
 	}
 	
 	public DoubleThreadedBST<T> clone()
@@ -37,6 +39,12 @@ public class DoubleThreadedBST<T extends Comparable<? super T>>
 		The clone method should return a copy/clone
 		of this tree.
 		*/
+		DoubleThreadedBST<T> newTree;
+		
+		if (root) {
+			newTree.root = root;
+			return newTree;
+		}
 		
 		return null;
 	}
@@ -63,6 +71,8 @@ public class DoubleThreadedBST<T extends Comparable<? super T>>
 		
 		NB: Do not throw an exception.
 		*/
+
+
 		
 		return false;
 	}
@@ -96,9 +106,39 @@ public class DoubleThreadedBST<T extends Comparable<? super T>>
 		returned. If the element is not in the tree, the
 		method should return false.
 		*/
-		
-		return false;
+		if (contains(root, element) == null) { 
+			return false;
+		} else {
+			return true;
+		}
 	}
+
+	public DTNode<T> contains( DTNode<T> root, T element)
+	{
+		//Base case
+		if (root == null || root.data == element)
+			return root;
+
+		//Greater than 
+		if (root.data.compareTo(element) > 0)
+			if(root.hasLeftThread)
+			{
+				return contains(null, element);
+			} else {
+				return contains(root.left, element);
+			}
+
+		//Less than 
+		if (root.data.compareTo(element) < 0)
+			if(root.hasRightThread)
+			{
+				return contains(null, element);
+			} else {
+				return contains(root.right, element);
+			}
+			
+	}
+
 	
 	public String inorderReverse()
 	{
@@ -233,8 +273,21 @@ public class DoubleThreadedBST<T extends Comparable<? super T>>
 		This method should count and return the number of nodes 
 		currently in the tree.
 		*/
-		
+		if (root != null){
+			return getNumberOfNodes(root);
+		}
+
 		return 0;
+	}
+
+	public int getNumberOfNodes(DTNode<T> root){
+		int count = 1;
+		if (root.left != null || ! root.hasLeftThread)
+			count += getNumberOfNodes(root.left);
+		if (root.right != null || ! root.hasRightThread)
+			count += getNumberOfNodes(root.right);
+		
+		return count;
 	}
 	
 	public int getHeight()
@@ -244,7 +297,25 @@ public class DoubleThreadedBST<T extends Comparable<? super T>>
 		of an empty tree is 0; the height of a tree with nothing but
 		the root is 1.
 		*/
-		
-		return 0;
+
+		return getHeight(root);
+	}
+
+	public int getHeight(DTNode<T> root){
+		if (root == null)
+			return 0;
+
+		if (root.hasLeftThread){
+			int hLeftSub = getHeight(null);
+		} else {
+			int hLeftSub = getHeight(root.left);
+		}
+
+		if (root.hasRightThread){
+			int hRightSub = getHeight(null);
+		} else {
+			int hRightSub = getHeight(root.right);
+		}
+		return Math.max(hLeftSub, hRightSub) + 1;
 	}
 }

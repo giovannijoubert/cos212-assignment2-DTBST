@@ -1,7 +1,7 @@
 /*
 Complete your details...
-Name and Surname: 
-Student/staff Number:
+Name and Surname: Giovanni Joubert 
+Student/staff Number: u18009035
 */
 
 public class DoubleThreadedDSW<T extends Comparable<? super T>> extends DoubleThreadedBST<T>
