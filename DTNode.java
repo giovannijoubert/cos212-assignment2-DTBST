@@ -6,12 +6,7 @@ Student/staff Number: u18009035
 
 public class DTNode<T extends Comparable<? super T>>
 {
-	/*
-	TODO: You must implement a node class which would be appropriate to use with your trees.
-	Methods and variables can be added.
-	Names of the given variables must not be altered. 
-	*/
-
+	
 	//Constructor
 	public DTNode(T data){
 		this.data = data;

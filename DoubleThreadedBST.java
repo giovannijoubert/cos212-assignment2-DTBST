@@ -9,13 +9,6 @@ public class DoubleThreadedBST<T extends Comparable<? super T>>
 {
 	private DTNode<T> root; // the root node of the tree
 
-	/*
-	TODO: You must complete each of the methods in this class to create
-	your own double threaded BST. You may add any additional methods
-	or data fields which you might need to accomplish your task. You
-	must NOT change the signatures of any methods given to you with this
-	class.
-	*/
 	
 	public DoubleThreadedBST()
 	{
@@ -39,9 +32,9 @@ public class DoubleThreadedBST<T extends Comparable<? super T>>
 		The clone method should return a copy/clone
 		of this tree.
 		*/
-		DoubleThreadedBST<T> newTree;
+		DoubleThreadedBST<T> newTree = new DoubleThreadedBST<T>();
 		
-		if (root) {
+		if (root != null) {
 			newTree.root = root;
 			return newTree;
 		}
@@ -72,10 +65,78 @@ public class DoubleThreadedBST<T extends Comparable<? super T>>
 		NB: Do not throw an exception.
 		*/
 
+		if (contains(element)){
+			return false;
+		}
 
-		
-		return false;
+		root = insert(root, element);
+
+		return true;
 	}
+
+	public DTNode<T> insert(DTNode<T> root, T element){
+
+	 DTNode<T> node = root;  
+
+	 if (node != null){
+	 
+		 // Moving on left subtree.  
+		 if (element.compareTo(node.data) < 0)  
+		 {  
+			 if (node.hasLeftThread == false && node.left != null)  {
+				node = node.left;  
+			 }
+		}
+	 
+		 // Moving on right subtree.  
+		 else
+		 {  
+			 if (node.hasRightThread == false && node.right != null){
+				 node = node.right;
+			 }
+		 }  
+		}
+	   
+	 
+	 // Create a new node  
+	 DTNode<T> InsertMe = new DTNode(element);  
+	   
+	 if (node == null)  
+	 {  
+		 root = InsertMe;  
+		 InsertMe.left = null;  
+		 InsertMe.right = null;  
+	 }  
+	 else if (element.compareTo(node.data) < 0)  
+	 {  
+		 InsertMe.left = node.left;
+		 if (node.hasLeftThread)
+			 InsertMe.hasLeftThread = true;
+			 
+		 InsertMe.right = node;
+		 InsertMe.hasRightThread = true;
+
+		 node.left = InsertMe;
+		node.hasLeftThread = false;
+	 }  
+	 else
+	 {  
+		InsertMe.right = node.right;
+		if (node.hasRightThread)
+			InsertMe.hasRightThread = true;
+			
+		InsertMe.left = node;
+		InsertMe.hasLeftThread = true;
+
+		node.right = InsertMe;
+	   node.hasRightThread = false;
+	 }  
+	 
+	 return root;
+       
+
+	}
+
 	
 	public boolean delete(T element)
 	{
@@ -136,6 +197,8 @@ public class DoubleThreadedBST<T extends Comparable<? super T>>
 			} else {
 				return contains(root.right, element);
 			}
+		
+		return null;
 			
 	}
 
@@ -164,8 +227,25 @@ public class DoubleThreadedBST<T extends Comparable<? super T>>
 		
 		E,D,C,B,A
 		*/
+		if (root == null)
+			return "";
+
+		DTNode<T> temp = root;
+		while (temp.right != null){
+			temp = temp.right;
+		}
+
+		String out = "";
+
+		out = out + temp.data;
+		temp = temp.left;
+
+		while(temp != null){
+			out = out + "," + temp.data;
+			temp = temp.left;
+		}
 		
-		return "";
+		return out;
 	}
 	
 	public String inorderReverseDetailed()
@@ -199,8 +279,32 @@ public class DoubleThreadedBST<T extends Comparable<? super T>>
 		
 		E|D,C|B,A
 		*/
+
+		if (root == null)
+			return "";
+
+		DTNode<T> temp = root;
+		while (temp.right != null){
+			temp = temp.right;
+		}
+
+		String out = "";
+
+		out = out + temp.data;
+	
+
+		while(temp.left != null){
+			if (temp.hasLeftThread){
+				temp = temp.left;
+				out = out + "|" + temp.data;
+			} else {
+				temp = temp.left;
+				out = out + "," + temp.data;
+			}
+			
+		}
 		
-		return "";
+		return out;
 	}
 	
 	public String preOrder()
@@ -227,8 +331,35 @@ public class DoubleThreadedBST<T extends Comparable<? super T>>
 		
 		B,A,D,C,E
 		*/
+		if (root == null)
+			return "";
+
+		DTNode<T> temp = root;
+		String out = "";
+
+		out = out + temp.data;
+		if (temp.left != null) {
+			temp = temp.left;
+		} else if (temp.right != null){
+			temp = temp.right;
+		}
+
+		while(temp != null){
+			out = out + "," + temp.data;
+
+			if(temp.left != null && ! temp.hasLeftThread){
+				temp = temp.left;
+				
+			} else if (temp.right != null){
+				if (temp.right.left == temp)
+				temp = temp.right.right;
+
+			} else {
+				temp = temp.right;
+			}
+		}
 		
-		return "";
+		return out;
 	}
 	
 	public String preorderDetailed()
@@ -264,7 +395,53 @@ public class DoubleThreadedBST<T extends Comparable<? super T>>
 		B,A|D,C|E
 		*/
 		
-		return "";
+		if (root == null)
+			return "";
+
+		DTNode<T> temp = root;
+		String out = "";
+
+		out = out + temp.data;
+
+		
+
+		while(temp.right != null){
+
+			if (temp.hasRightThread){
+				if(temp.left != null && ! temp.hasLeftThread){
+					temp = temp.left;
+				} else if (temp.right != null){
+	
+	
+				 if (temp.right.left == temp)
+					temp = temp.right.right;
+				} else {
+					temp = temp.right;
+				}
+
+
+
+				out = out + "|" + temp.data;
+			} else {
+
+				if(temp.left != null && ! temp.hasLeftThread){
+					temp = temp.left;
+				} else if (temp.right != null){
+	
+	
+				 if (temp.right.left == temp)
+					temp = temp.right.right;
+				} else {
+					temp = temp.right;
+				}
+				out = out + "," + temp.data;
+			}
+			
+
+			
+		}
+		
+		return out;
 	}
 	
 	public int getNumberOfNodes()
@@ -282,9 +459,9 @@ public class DoubleThreadedBST<T extends Comparable<? super T>>
 
 	public int getNumberOfNodes(DTNode<T> root){
 		int count = 1;
-		if (root.left != null || ! root.hasLeftThread)
+		if (root.left != null && ! root.hasLeftThread)
 			count += getNumberOfNodes(root.left);
-		if (root.right != null || ! root.hasRightThread)
+		if (root.right != null && ! root.hasRightThread)
 			count += getNumberOfNodes(root.right);
 		
 		return count;
@@ -305,16 +482,18 @@ public class DoubleThreadedBST<T extends Comparable<? super T>>
 		if (root == null)
 			return 0;
 
+			int hLeftSub;
+			int hRightSub ;
 		if (root.hasLeftThread){
-			int hLeftSub = getHeight(null);
+			 hLeftSub = getHeight(null);
 		} else {
-			int hLeftSub = getHeight(root.left);
+			 hLeftSub = getHeight(root.left);
 		}
 
 		if (root.hasRightThread){
-			int hRightSub = getHeight(null);
+			 hRightSub = getHeight(null);
 		} else {
-			int hRightSub = getHeight(root.right);
+			 hRightSub = getHeight(root.right);
 		}
 		return Math.max(hLeftSub, hRightSub) + 1;
 	}
