@@ -126,11 +126,11 @@ public class DoubleThreadedBST<T extends Comparable<? super T>>
 	 }  
 	 else
 	 {  
-		if (node.right != null){
+	/*	if (node.right != null){
 			if(node.right.right == null)
 				node = node.right;
 			
-		}
+		}*/
 		
 
 		InsertMe.right = node.right;
@@ -264,7 +264,20 @@ public class DoubleThreadedBST<T extends Comparable<? super T>>
 // One child
 DTNode<T> caseB( DTNode<T> root, DTNode<T> par, DTNode<T> ptr) 
 { 
-	
+	if(ptr.right == null){ // only left kid
+		ptr.left.right = ptr.right;
+		if(par.left == ptr)
+			par.left = ptr.left;
+		else
+			par.right = ptr.left;
+	} else { // only right kid
+		ptr.right.left = ptr.left;
+		if(par.left == ptr)
+			par.left = ptr.right;
+		else
+			par.right = ptr.right;
+	}
+
     return root; 
 } 
 
