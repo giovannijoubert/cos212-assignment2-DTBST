@@ -74,41 +74,46 @@ public class DoubleThreadedBST<T extends Comparable<? super T>>
 		return true;
 	}
 
-	public DTNode<T> insert(DTNode<T> root, T element){
+	public DTNode<T> insert(DTNode<T> node, T element){
 
-	 DTNode<T> node = root;  
-
-	 if (node != null){
+		DTNode<T> InsertMe = new DTNode(element);  
+	   
+	
+		if(root != null){
 	 
 		 // Moving on left subtree.  
 		 if (element.compareTo(node.data) < 0)  
 		 {  
 			 if (node.hasLeftThread == false && node.left != null)  {
-				node = node.left;  
+				return insert(node.left, element);
 			 }
 		}
 	 
 		 // Moving on right subtree.  
-		 else
+		 else if (element.compareTo(node.data) > 0)
 		 {  
 			 if (node.hasRightThread == false && node.right != null){
-				 node = node.right;
+				return insert(node.right, element);
 			 }
-		 }  
+		 }
 		}
-	   
+		    
 	 
 	 // Create a new node  
-	 DTNode<T> InsertMe = new DTNode(element);  
-	   
-	 if (node == null)  
+	 if (root == null)  
 	 {  
 		 root = InsertMe;  
 		 InsertMe.left = null;  
 		 InsertMe.right = null;  
 	 }  
-	 else if (element.compareTo(node.data) < 0)  
+	   
+	else if (element.compareTo(node.data) < 0)  
 	 {  
+		 if (node.left != null){
+			if(node.left.left == null)
+			 node = node.left;
+		 }
+
 		 InsertMe.left = node.left;
 		 if (node.hasLeftThread)
 			 InsertMe.hasLeftThread = true;
@@ -121,6 +126,13 @@ public class DoubleThreadedBST<T extends Comparable<? super T>>
 	 }  
 	 else
 	 {  
+		if (node.right != null){
+			if(node.right.right == null)
+				node = node.right;
+			
+		}
+		
+
 		InsertMe.right = node.right;
 		if (node.hasRightThread)
 			InsertMe.hasRightThread = true;
@@ -131,11 +143,14 @@ public class DoubleThreadedBST<T extends Comparable<? super T>>
 		node.right = InsertMe;
 	   node.hasRightThread = false;
 	 }  
-	 
+	
+	
 	 return root;
+	
        
 
 	}
+
 
 	
 	public boolean delete(T element)
@@ -155,9 +170,126 @@ public class DoubleThreadedBST<T extends Comparable<? super T>>
 		
 		NB: Do not throw an exception.
 		*/
+
+		if (!contains(element)){
+			return false; //handles empty tree & not found
+		}
 		
-		return false;
+		root = deleteNode(root, element);
+
+		
+		return true;
 	}
+
+
+
+// Deletes a key from threaded BST with given root and 
+// returns new root of BST. PRECHECKED that element EXISTS
+	public DTNode<T> deleteNode(DTNode<T> root, T element){
+
+		 // Initialize parent as NULL and ptrent 
+    // Node as root. 
+	DTNode<T> par = null;
+	DTNode<T> ptr = root; 
+  
+    // Search key in BST : find Node and its 
+    // parent. 
+    while (ptr != null) 
+    { 
+        if (element == ptr.data) 
+        { 
+            break; 
+        } 
+        par = ptr; 
+        if (element.compareTo(ptr.data) < 0) 
+        { 
+            if (ptr.hasLeftThread == false) 
+                ptr = ptr.left; 
+            else
+                break; 
+        } 
+        else
+        { 
+            if (ptr.hasRightThread == false) 
+                ptr = ptr.right; 
+            else
+                break; 
+        } 
+    } 
+  
+    // Two Children 
+    if (ptr.hasLeftThread == false && ptr.hasRightThread == false) 
+		root = caseC(root, par, ptr); 
+		
+	else if (ptr.hasRightThread && ptr.left == null)
+		root = caseA(root, par, ptr); // no child (leftmost)
+
+	else if (ptr.hasLeftThread && ptr.right == null)
+		root = caseA(root, par, ptr); // no child (rightmost)
+
+	else if (ptr.hasLeftThread && ptr.hasRightThread)
+		root = caseA(root, par, ptr); // no child (middle)
+
+    // Only Left Child 
+    else if (ptr.hasLeftThread == false && ptr.right != null) 
+        root = caseB(root, par, ptr); 
+  
+    // Only Right Child 
+    else if (ptr.hasRightThread == false && ptr.left != null) 
+        root = caseB(root, par, ptr); 
+    
+  
+    return root; 
+
+	}
+
+
+	// no child
+	DTNode<T> caseA(DTNode<T> root, DTNode<T> par, DTNode<T> ptr) 
+{ 
+	if (par.left == ptr){
+		par.left = ptr.left;
+		if (ptr.hasLeftThread)
+			par.hasLeftThread = true;
+	} else {
+		par.right = ptr.right;
+		if (ptr.hasRightThread)
+			par.hasRightThread = true;
+	}
+
+    return root; 
+} 
+
+
+// One child
+DTNode<T> caseB( DTNode<T> root, DTNode<T> par, DTNode<T> ptr) 
+{ 
+	
+    return root; 
+} 
+
+// Two children
+DTNode<T> caseC(DTNode<T> root, DTNode<T> par, DTNode<T> ptr) 
+{ 
+		DTNode<T> temp = ptr.right;
+		while(temp.left != null && !temp.hasLeftThread){ 
+			temp = temp.left;
+		}
+
+		if(ptr.left.hasRightThread) 
+			ptr.left.right = temp;
+
+		if(ptr.right.left.hasLeftThread)
+			ptr.right.left.hasLeftThread = false;
+	
+		temp.left = ptr.left;
+		temp = ptr;
+		ptr = ptr.right;
+		par.right = ptr;
+  
+    return root; 
+}
+
 		
 	public boolean contains(T element)
 	{
@@ -182,7 +314,7 @@ public class DoubleThreadedBST<T extends Comparable<? super T>>
 
 		//Greater than 
 		if (root.data.compareTo(element) > 0)
-			if(root.hasLeftThread)
+			if(root.hasLeftThread || root.left == null)
 			{
 				return contains(null, element);
 			} else {
@@ -191,7 +323,7 @@ public class DoubleThreadedBST<T extends Comparable<? super T>>
 
 		//Less than 
 		if (root.data.compareTo(element) < 0)
-			if(root.hasRightThread)
+			if(root.hasRightThread || root.right == null)
 			{
 				return contains(null, element);
 			} else {
@@ -332,32 +464,36 @@ public class DoubleThreadedBST<T extends Comparable<? super T>>
 		B,A,D,C,E
 		*/
 		if (root == null)
-			return "";
+		return "";
 
-		DTNode<T> temp = root;
-		String out = "";
+	DTNode<T> temp = root;
+	String out = "";
 
-		out = out + temp.data;
-		if (temp.left != null) {
+	out = out + temp.data;
+	
+
+	while(temp != null){
+
+		if (temp.left != null && !temp.hasLeftThread){
 			temp = temp.left;
-		} else if (temp.right != null){
-			temp = temp.right;
-		}
-
-		while(temp != null){
+			if(temp == null) break;
 			out = out + "," + temp.data;
-
-			if(temp.left != null && ! temp.hasLeftThread){
-				temp = temp.left;
-				
-			} else if (temp.right != null){
-				if (temp.right.left == temp)
-				temp = temp.right.right;
-
-			} else {
+		} else if (temp.hasRightThread){
+			while(temp.hasRightThread)
 				temp = temp.right;
-			}
+			temp = temp.right;
+			if(temp == null) break;
+			out = out + "," + temp.data;
+		} else {
+			temp = temp.right;
+			if(temp == null) break;
+			out = out + "," + temp.data;
 		}
+
+	
+		
+	}
+
 		
 		return out;
 	}
@@ -402,44 +538,32 @@ public class DoubleThreadedBST<T extends Comparable<? super T>>
 		String out = "";
 
 		out = out + temp.data;
-
 		
 
-		while(temp.right != null){
+		while(temp != null){
 
-			if (temp.hasRightThread){
-				if(temp.left != null && ! temp.hasLeftThread){
-					temp = temp.left;
-				} else if (temp.right != null){
-	
-	
-				 if (temp.right.left == temp)
-					temp = temp.right.right;
-				} else {
+			if (temp.left != null && !temp.hasLeftThread){
+				temp = temp.left;
+				if(temp == null) break;
+				out = out + "," + temp.data;
+			} else if (temp.hasRightThread){
+				while(temp.hasRightThread)
 					temp = temp.right;
-				}
-
-
-
+				temp = temp.right;
+				if(temp == null) break;
 				out = out + "|" + temp.data;
 			} else {
-
-				if(temp.left != null && ! temp.hasLeftThread){
-					temp = temp.left;
-				} else if (temp.right != null){
-	
-	
-				 if (temp.right.left == temp)
-					temp = temp.right.right;
-				} else {
-					temp = temp.right;
-				}
+				temp = temp.right;
+				if(temp == null) break;
 				out = out + "," + temp.data;
 			}
-			
 
+		
 			
 		}
+
+		
+		
 		
 		return out;
 	}
