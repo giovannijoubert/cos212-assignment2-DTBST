@@ -9,12 +9,12 @@ public class Tester
 		myDTBST.insert("A");
 		myDTBST.insert("D");
 		myDTBST.insert("C");
-		myDTBST.insert("H");
-		myDTBST.insert("F");
-		myDTBST.insert("G");
+		myDTBST.insert("E");
+		
+		
 	
 
-		myDTBST.delete("E");
+	//	myDTBST.delete(36);
 
 		System.out.println("NUMBER OF NODES: \t\t" + myDTBST.getNumberOfNodes());
 		System.out.println("HEIGHT OF TREE: \t\t" + myDTBST.getHeight());

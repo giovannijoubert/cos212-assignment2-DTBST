@@ -109,10 +109,10 @@ public class DoubleThreadedBST<T extends Comparable<? super T>>
 	   
 	else if (element.compareTo(node.data) < 0)  
 	 {  
-		 if (node.left != null){
+		 /*if (node.left != null){
 			if(node.left.left == null)
 			 node = node.left;
-		 }
+		 } */
 
 		 InsertMe.left = node.left;
 		 if (node.hasLeftThread)
@@ -385,9 +385,29 @@ DTNode<T> caseC(DTNode<T> root, DTNode<T> par, DTNode<T> ptr)
 		out = out + temp.data;
 		temp = temp.left;
 
+		boolean followedThread = true;
 		while(temp != null){
+			if (!followedThread)
+				while(!temp.hasRightThread)
+					temp = temp.right;
+				
 			out = out + "," + temp.data;
-			temp = temp.left;
+
+			if (temp.hasLeftThread && followedThread)
+			{
+				while(temp.hasLeftThread)
+					temp = temp.left;
+				followedThread = true;
+			} else if(temp.hasLeftThread)
+			{
+				followedThread = true;
+				temp = temp.left;
+			}
+			else 
+			{
+				followedThread = false;
+				temp = temp.left;
+			}
 		}
 		
 		return out;
@@ -436,17 +456,34 @@ DTNode<T> caseC(DTNode<T> root, DTNode<T> par, DTNode<T> ptr)
 		String out = "";
 
 		out = out + temp.data;
-	
+		temp = temp.left;
 
-		while(temp.left != null){
-			if (temp.hasLeftThread){
-				temp = temp.left;
+		boolean followedThread = true;
+		while(temp != null){
+			if (!followedThread)
+				while(!temp.hasRightThread)
+					temp = temp.right;
+				
+			if (followedThread)
 				out = out + "|" + temp.data;
-			} else {
-				temp = temp.left;
+			else 
 				out = out + "," + temp.data;
+
+			if (temp.hasLeftThread && followedThread)
+			{
+				while(temp.hasLeftThread)
+					temp = temp.left;
+				followedThread = true;
+			} else if(temp.hasLeftThread)
+			{
+				followedThread = true;
+				temp = temp.left;
 			}
-			
+			else 
+			{
+				followedThread = false;
+				temp = temp.left;
+			}
 		}
 		
 		return out;
