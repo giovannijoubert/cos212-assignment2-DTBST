@@ -23,7 +23,20 @@ public class DoubleThreadedBST<T extends Comparable<? super T>>
 		/*
 		The copy constructor
 		*/
-		root = other.root;
+		this.root = null;
+     	copy(other.root);
+	}
+
+	public void copy(DTNode<T> N)
+	{
+     	if(N != null)
+    	{
+		 insert(N.data);
+		 if (!N.hasLeftThread)
+			 copy(N.left);
+		 if (!N.hasRightThread)
+        	 copy(N.right);
+     	}
 	}
 	
 	public DoubleThreadedBST<T> clone()
@@ -34,13 +47,26 @@ public class DoubleThreadedBST<T extends Comparable<? super T>>
 		*/
 		DoubleThreadedBST<T> newTree = new DoubleThreadedBST<T>();
 		
-		if (root != null) {
-			newTree.root = root;
+		if (this.root != null) {
+			cloner(this.root, newTree);
 			return newTree;
 		}
 		
 		return null;
 	}
+
+	public void cloner(DTNode<T> ThisTreeRoot, DoubleThreadedBST<T> newTree)
+	{
+     	if(ThisTreeRoot != null)
+    	{
+		 newTree.insert(ThisTreeRoot.data);
+		 if (!ThisTreeRoot.hasLeftThread)
+			 newTree.cloner(ThisTreeRoot.left, newTree);
+		 if (!ThisTreeRoot.hasRightThread)
+		 	newTree.cloner(ThisTreeRoot.right, newTree);
+     	}
+	}
+	
 	
 	public DTNode<T> getRoot()
 	{
@@ -456,13 +482,20 @@ DTNode<T> caseC(DTNode<T> root, DTNode<T> par, DTNode<T> ptr)
 		String out = "";
 
 		out = out + temp.data;
+
+		boolean followedThread = false;
+		if(temp.hasLeftThread)
+			followedThread = true;
+
 		temp = temp.left;
 
-		boolean followedThread = true;
+		
 		while(temp != null){
 			if (!followedThread)
 				while(!temp.hasRightThread)
+				{
 					temp = temp.right;
+				}
 				
 			if (followedThread)
 				out = out + "|" + temp.data;
@@ -472,7 +505,10 @@ DTNode<T> caseC(DTNode<T> root, DTNode<T> par, DTNode<T> ptr)
 			if (temp.hasLeftThread && followedThread)
 			{
 				while(temp.hasLeftThread)
+				{
+					//out = out + "|";
 					temp = temp.left;
+				}
 				followedThread = true;
 			} else if(temp.hasLeftThread)
 			{
@@ -598,10 +634,13 @@ DTNode<T> caseC(DTNode<T> root, DTNode<T> par, DTNode<T> ptr)
 				out = out + "," + temp.data;
 			} else if (temp.hasRightThread){
 				while(temp.hasRightThread)
+				{
+					out = out + "|";
 					temp = temp.right;
+				}
 				temp = temp.right;
 				if(temp == null) break;
-				out = out + "|" + temp.data;
+				out = out  + temp.data;
 			} else {
 				temp = temp.right;
 				if(temp == null) break;
